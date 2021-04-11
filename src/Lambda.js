@@ -11,6 +11,7 @@ class Lambda {
     
     constructor() {        
         this.logger = new Logger();
+        this.targetFolder = "uploaded-receive-files";
     }
 
     async main(event, callback) {
@@ -19,7 +20,7 @@ class Lambda {
         
         const triggerObject = decodeURIComponent(event.Records[0].s3.object.key.replace(/\+/g, " "));
 
-        const targetObject = triggerObject.replace("received", "uploaded-receive-files");
+        const targetObject = triggerObject.replace("received", this.targetFolder);
         
         const objectName = triggerObject.split("received/");
 
@@ -53,8 +54,8 @@ class Lambda {
     upload(callback, token, {bucketName, objectName, triggerObject, targetObject}){
         const awsS3 = new Aws.S3();
         const TOKEN_TYPE = "Bearer ";
-        const BACKOFFICE_SERVER = process.env.BACKOFFICE_SERVER
-        const BACKOFFICE_ENDPOINT = process.env.BACKOFFICE_ENDPOINT
+        const SERVER = process.env.SERVER
+        const ENDPOINT = process.env.ENDPOINT
         const logger = new Logger();
         
         let formData = new FormData();
@@ -66,9 +67,10 @@ class Lambda {
                     Key: triggerObject
                 }, next);
             },
+            // Uploading received file to a endpoint using axios (example)
             function upload(response, next) {
                 formData.append('data', response.Body, objectName);
-                Axios.post(`${BACKOFFICE_SERVER+BACKOFFICE_ENDPOINT}`, formData, {
+                Axios.post(`${SERVER+ENDPOINT}`, formData, {
                     headers: {
                         'Authorization': `${TOKEN_TYPE+token}`,
                         'Content-Type': `multipart/form-data; boundary=${formData._boundary}`

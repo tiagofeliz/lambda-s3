@@ -4,8 +4,8 @@ class SSMManager {
     
     constructor() {
         this.awsSSM = new Aws.SSM();
-        this.SSM_Param = 'lambda-backoffice-payment-lot';
-        this.Decryption = true
+        this.SSM_PARAM = process.env.SSM_PARAM;
+        this.decryption = true
     }
 
     async getCredentials(){
@@ -18,8 +18,8 @@ class SSMManager {
 
     async getParameters(){
         let params = {
-            Name: this.SSM_Param,
-            WithDecryption: this.Decryption
+            Name: this.SSM_PARAM,
+            WithDecryption: this.decryption
         };
        
         let request = await this.awsSSM.getParameter(params).promise();
